@@ -1,0 +1,67 @@
+# 2048px ALFS variant for the embedding-detector track.
+# Writes to a SEPARATE alfs_output_root so the 1024px renders that the
+# six pixel detectors were trained on stay exactly as they are.
+# Same 70x70 m ortho window and same virtual camera - only the sampling
+# density changes, so normalised labels are unchanged.
+# Geo-referencing pipeline configuration.
+# Paths use the Z: network drive layout. Override locally via config.local.yaml
+# (same keys; merged on top) or with --config on the CLI.
+
+paths:
+  # Per-flight source data: <flights_root>/<id>/frames/{rgb,thermal}/NNNNNN.jpg
+  flights_root: "Z:/Hugo/matched_dataset_new/data/flights"
+  # Projection-ready poses, DEM (.glb/.json), corrections, masks: <id>_*.*
+  correction_data: "Z:/correction_data2"
+  # Manually filtered MOT labels: MOT/{rgb,thermal}/<id>_accepted_{rgb,thermal}_mot.txt
+  mot_root: "Z:/Hugo/matched_dataset_new/MOT"
+  # Output: <output_root>/<id>/{rgb,thermal}/NNNNNN.png (+ .txt)
+  # Separate from the 1024px tree: ortho mode writes here too, and mixing
+  # two resolutions under identical filenames would be undetectable later.
+  output_root: "Z:/Hugo/matched_dataset_new/geo-referenced2_2k"
+
+  # --- ALFS only -------------------------------------------------------
+  # Source videos: <videos_root>/<id>_matched_processed.mp4, 2048x1024,
+  # left half = thermal, right half = rgb, frame index == pose index.
+  videos_root: "Z:/bambi_dataset/processed_videos"
+  # Cache of neighbour frames decoded out of those videos:
+  #   <neighbor_frames_root>/<id>/{rgb,thermal}/NNNNNN.jpg
+  neighbor_frames_root: "Z:/Hugo/matched_dataset_new/neighbor_frames"
+  # ALFS renderings: <alfs_output_root>/<id>/{rgb,thermal}/NNNNNN.png (+ .txt)
+  alfs_output_root: "Z:/Hugo/matched_dataset_new/alfs_2k"
+
+# Which correction source to use per flight:
+#   "flights"        -> <flights_root>/<id>/<id>_correction.json (has fine_corrections)
+#   "correction_data"-> <correction_data>/<id>_correction.json (global only)
+correction_source: "flights"
+
+# Orthographic render settings (match the reference notebook / alfspy defaults).
+render:
+  ortho_width: 70
+  ortho_height: 70
+  # 1024 matches the raw frames and the ortho renders already in output_root,
+  # so raw / ortho / ALFS detectors all train at the same resolution.
+  render_width: 2048
+  render_height: 2048
+  fovy_fallback: 50.0
+  aspect_ratio: 1.0
+
+# Airborne light field sampling (synthetic aperture) settings.
+# The aperture is expressed in video frame indices around the central frame.
+# At ~30 fps and ~3 m/s ground speed one frame is ~0.10 m, so the defaults give
+# 31 shots spanning ~9 m at ~0.3 m spacing.
+alfs:
+  neighbors_before: 45
+  neighbors_after: 45
+  stride: 3
+  alpha_threshold: 2.0    # min overlapping shots a pixel needs to survive
+  auto_contrast: true
+  use_mask: true          # apply the modality mask to each shot texture
+  label_mode: "both"      # merged | central | both
+
+# Behaviour
+mode: "ortho"                    # ortho | alfs; overridable via --mode
+modalities: ["rgb", "thermal"]   # default; overridable via --modalities
+overwrite: false                 # re-render frames whose outputs already exist
+allow_dem_download: false        # if a DEM is missing, attempt download (slow, ~GBs)
+labeled_only: false              # true = only process frames that have MOT labels
+                                 # (overridable via --labeled-only / --all-frames)

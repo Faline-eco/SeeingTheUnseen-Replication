@@ -1,0 +1,174 @@
+[
+  {
+    "stem": "70_001360",
+    "n_gt": 4,
+    "n_hidden": 3,
+    "cells": {
+      "realortho_single": {
+        "tp": 1,
+        "hidden_tp": 0,
+        "fp": 0,
+        "file": "thermal_70_001360_raw-single.png"
+      },
+      "realalfs_multi": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001360_raw-multi.png"
+      },
+      "embed_single": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001360_dinov3-single.png"
+      },
+      "embed_multi": {
+        "tp": 3,
+        "hidden_tp": 2,
+        "fp": 0,
+        "file": "thermal_70_001360_dinov3-multi.png"
+      },
+      "vjepa_single": {
+        "tp": 1,
+        "hidden_tp": 0,
+        "fp": 0,
+        "file": "thermal_70_001360_vjepa-single.png"
+      },
+      "vjepa_multi": {
+        "tp": 1,
+        "hidden_tp": 0,
+        "fp": 1,
+        "file": "thermal_70_001360_vjepa-multi.png"
+      }
+    }
+  },
+  {
+    "stem": "70_001370",
+    "n_gt": 4,
+    "n_hidden": 3,
+    "cells": {
+      "realortho_single": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 2,
+        "file": "thermal_70_001370_raw-single.png"
+      },
+      "realalfs_multi": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001370_raw-multi.png"
+      },
+      "embed_single": {
+        "tp": 1,
+        "hidden_tp": 0,
+        "fp": 0,
+        "file": "thermal_70_001370_dinov3-single.png"
+      },
+      "embed_multi": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001370_dinov3-multi.png"
+      },
+      "vjepa_single": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 1,
+        "file": "thermal_70_001370_vjepa-single.png"
+      },
+      "vjepa_multi": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 2,
+        "file": "thermal_70_001370_vjepa-multi.png"
+      }
+    }
+  },
+  {
+    "stem": "70_001640",
+    "n_gt": 4,
+    "n_hidden": 3,
+    "cells": {
+      "realortho_single": {
+        "tp": 1,
+        "hidden_tp": 0,
+        "fp": 1,
+        "file": "thermal_70_001640_raw-single.png"
+      },
+      "realalfs_multi": {
+        "tp": 3,
+        "hidden_tp": 2,
+        "fp": 2,
+        "file": "thermal_70_001640_raw-multi.png"
+      },
+      "embed_single": {
+        "tp": 1,
+        "hidden_tp": 1,
+        "fp": 1,
+        "file": "thermal_70_001640_dinov3-single.png"
+      },
+      "embed_multi": {
+        "tp": 4,
+        "hidden_tp": 3,
+        "fp": 2,
+        "file": "thermal_70_001640_dinov3-multi.png"
+      },
+      "vjepa_single": {
+        "tp": 1,
+        "hidden_tp": 1,
+        "fp": 1,
+        "file": "thermal_70_001640_vjepa-single.png"
+      },
+      "vjepa_multi": {
+        "tp": 3,
+        "hidden_tp": 2,
+        "fp": 1,
+        "file": "thermal_70_001640_vjepa-multi.png"
+      }
+    }
+  },
+  {
+    "stem": "70_001350",
+    "n_gt": 3,
+    "n_hidden": 2,
+    "cells": {
+      "realortho_single": {
+        "tp": 0,
+        "hidden_tp": 0,
+        "fp": 0,
+        "file": "thermal_70_001350_raw-single.png"
+      },
+      "realalfs_multi": {
+        "tp": 1,
+        "hidden_tp": 0,
+        "fp": 0,
+        "file": "thermal_70_001350_raw-multi.png"
+      },
+      "embed_single": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001350_dinov3-single.png"
+      },
+      "embed_multi": {
+        "tp": 3,
+        "hidden_tp": 2,
+        "fp": 0,
+        "file": "thermal_70_001350_dinov3-multi.png"
+      },
+      "vjepa_single": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001350_vjepa-single.png"
+      },
+      "vjepa_multi": {
+        "tp": 2,
+        "hidden_tp": 1,
+        "fp": 0,
+        "file": "thermal_70_001350_vjepa-multi.png"
+      }
+    }
+  }
+]

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=63"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "georef"
+version = "0.1.0"
+description = "Flight-by-flight orthographic geo-referencing of BAMBI drone frames and MOT labels."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "opencv-python>=4.7",
+    "pyrr==0.10.3",
+    "trimesh==3.21.7",
+    "PyYAML>=6.0",
+    # alfspy is installed editable from third_party/alfs_py (see scripts/setup.ps1)
+]
+
+[project.scripts]
+georef = "georef.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

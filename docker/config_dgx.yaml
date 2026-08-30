@@ -1,0 +1,48 @@
+# DGX-side config for embedding encoding.
+#
+# Only the paths differ from the workstation config: everything the encoder
+# touches must live under /scratch/bambi, which is the only location we are
+# permitted to use on that machine.
+#
+# The render settings below describe the 2048px ALFS variant, but note the DGX
+# never renders — ALFS/orthographic rendering needs ModernGL/OpenGL, which in a
+# container falls back to software rasterisation and has produced renderings
+# with artifacts before. Rendering happens on the workstation; only its PNG
+# output is copied here. These values are present so `load_config` succeeds and
+# so the provenance of the images is recorded alongside them.
+
+paths:
+  flights_root: "/scratch/bambi/datasets/alfs_embed/matched_dataset_new/data/flights"
+  correction_data: "/scratch/bambi/datasets/alfs_embed/correction_data2"
+  mot_root: "/scratch/bambi/datasets/alfs_embed/matched_dataset_new/MOT"
+  output_root: "/scratch/bambi/datasets/alfs_embed/matched_dataset_new/geo-referenced2"
+  videos_root: "/scratch/bambi/datasets/alfs_embed/videos"
+  # The DGX copy merges centrals and aperture neighbours into one tree per
+  # flight, which is exactly the shape resolve_frame_path expects here.
+  neighbor_frames_root: "/scratch/bambi/datasets/matched/frames"
+  alfs_output_root: "/scratch/bambi/datasets/alfs_embed/matched_dataset_new/alfs_2k"
+
+render:
+  ortho_width: 70
+  ortho_height: 70
+  render_width: 2048
+  render_height: 2048
+  fovy_fallback: 50.0
+  aspect_ratio: 1.0
+
+alfs:
+  neighbors_before: 45
+  neighbors_after: 45
+  stride: 3
+  alpha_threshold: 2.0
+  auto_contrast: true
+  use_mask: true
+  label_mode: "both"
+
+mode: "alfs"
+modalities: ["rgb", "thermal"]
+correction_source: "flights"
+overwrite: false
+allow_dem_download: false
+labeled_only: false
+extract_neighbors: false

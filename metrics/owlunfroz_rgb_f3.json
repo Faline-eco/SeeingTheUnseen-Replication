@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "scorer": "point-in-box, one-to-one greedy by confidence",
+    "modality": "rgb",
+    "occlusion": "hidden",
+    "labels_dataset": "alfs_2k_rgb_f3",
+    "conf": 0.3,
+    "down_ratio": 2.0,
+    "imgsz": 1024,
+    "generated": "2026-08-23T05:21:52",
+    "note": "Point-in-box is more permissive than IoU 0.5. Only compare numbers produced by this scorer with each other."
+  },
+  "arms": {
+    "owld_unfroz_ortho_rgb_f3": {
+      "n_frames": 1864,
+      "populations": {
+        "visible": {
+          "recall": 0.7130019120458891,
+          "precision": 0.8476926574221414,
+          "f1": 0.7745352580745665,
+          "tp": 3729,
+          "fp": 670,
+          "n_gt": 5230
+        },
+        "occluded": {
+          "recall": 0.4044160371876816,
+          "precision": 0.5095168374816984,
+          "f1": 0.4509232264334305,
+          "tp": 696,
+          "fp": 670,
+          "n_gt": 1721
+        },
+        "all": {
+          "recall": 0.6365990504963315,
+          "precision": 0.8684985279685966,
+          "f1": 0.7346837124356632,
+          "tp": 4425,
+          "fp": 670,
+          "n_gt": 6951
+        }
+      }
+    },
+    "owld_unfroz_alfs_rgb_f3": {
+      "n_frames": 1864,
+      "populations": {
+        "visible": {
+          "recall": 0.7017208413001912,
+          "precision": 0.8491439148542341,
+          "f1": 0.7684254606365158,
+          "tp": 3670,
+          "fp": 652,
+          "n_gt": 5230
+        },
+        "occluded": {
+          "recall": 0.4264962231260895,
+          "precision": 0.5295815295815296,
+          "f1": 0.4724814934019955,
+          "tp": 734,
+          "fp": 652,
+          "n_gt": 1721
+        },
+        "all": {
+          "recall": 0.6335779024600777,
+          "precision": 0.8710443037974683,
+          "f1": 0.7335720829516116,
+          "tp": 4404,
+          "fp": 652,
+          "n_gt": 6951
+        }
+      }
+    }
+  }
+}

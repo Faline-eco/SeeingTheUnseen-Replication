@@ -1,0 +1,28 @@
+# Virtual environments: .venv renders, .venv-train has torch + ultralytics,
+# .venv-neural has torch + trimesh4/embreex for the neural blend.
+.venv/
+.venv-train/
+.venv-neural/
+
+# Model weights (downloaded: ultralytics pretrained + released BAMBI detectors)
+*.pt
+
+# Cloned third-party libraries (re-created by scripts/setup.ps1)
+third_party/alfs_py/
+third_party/bambi_detection/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Local config overrides
+config.local.yaml
+
+# Logs
+*.log
+logs/
+
+# Local validation / test outputs
+_validation_out/

@@ -1,0 +1,4 @@
+# core.autocrlf=true would otherwise check these out with CRLF on Windows. They
+# are deployed to the DGX by scp and run under bash there, where a trailing \r
+# makes `set -euo pipefail` abort the script at line 1.
+*.sh text eol=lf
