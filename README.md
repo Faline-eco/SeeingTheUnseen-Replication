@@ -117,3 +117,15 @@ covered that ground. About a quarter of the population has a central annotation
 overlapping in the 0.3–0.5 band, i.e. an animal that *is* annotated centrally
 whose merged box misses the threshold. `scripts/audit_hidden_population.py`
 quantifies it; it has not been re-scored with those excluded.
+
+## Licence
+
+**MIT** ([`LICENSE`](LICENSE)) for everything here, and for the detection heads,
+PCA bases and INSID3 bases published on Hugging Face.
+
+**One exception.** The YOLO26x weights under `yolo/` on Hugging Face are
+fine-tuned from Ultralytics YOLO26x and inherit its **AGPL-3.0** terms. If you
+use those checkpoints, AGPL-3.0 applies to them; it does not reach the rest.
+
+Imagery derives from the public BAMBI dataset under its own terms. DINOv3 and
+V-JEPA 2.1 are used frozen and unmodified and are not redistributed here.
