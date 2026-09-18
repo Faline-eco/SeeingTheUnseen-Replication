@@ -67,6 +67,7 @@ bash docker/integrate_dgx.sh                  # aperture integration -> embed_si
 bash docker/vjepa_cells.sh                    # V-JEPA single / multi cells
 python scripts/make_realalfs_cell.py          # image-space cells (128x128x3)
 python scripts/render_embedding_field.py      # average-then-encode arm (integration order)
+bash docker/viewgrid_dgx.sh                   # --emit grid: sampling geometry for the learned aggregators
 python scripts/fit_positional_basis_dino.py   # INSID3 bases, for the debias study
 python scripts/fit_positional_basis_vjepa.py
 ```
@@ -77,6 +78,7 @@ python scripts/fit_positional_basis_vjepa.py
 bash docker/multiseed_dgx.sh                  # embedding heads, 5 folds x 3 seeds
 bash docker/vjepa_debias.sh                   # debiased variants
 bash docker/alfsembed_cv.sh                   # integration-order arm
+bash docker/launch_viewagg.sh                 # learned view aggregation, AGG=mean|attn|gru|swin (viewagg_cv.sh)
 bash docker/yolo_cv.sh                        # YOLO26x, 60 runs
 bash docker/owl_run.sh                        # OWL zero-shot
 bash docker/owl_finetune.sh                   # OWL-D fine-tune
@@ -123,6 +125,7 @@ rest.
 | OWL baseline | `owl_rgb_f*.json`, `owlft_rgb_f*.json` | `docs/OWL_BASELINE.md` |
 | ground-truth choice | `yolo_thermal.json`, `yolo_rgb.json` | single split, see `docs/PART2_YOLO_THERMAL.md` |
 | head capacity | `w512_thermal_f*.json` | `scripts/cap_table.py` |
+| learned view aggregation | `viewagg_{mean,attn,gru,swin}_{thermal,rgb}_f*.json` | `scripts/viewagg_arms.py attn gru swin` |
 
 `scripts/ckwidth.py` reads head geometry back out of a checkpoint, which is how
 the head-capacity claims are checked against the runs rather than against the

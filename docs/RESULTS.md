@@ -713,6 +713,34 @@ Full record: `OWL_BASELINE.md`. Metrics: `metrics/owlft_rgb_f{0..4}.json`,
 
 ---
 
+### 6.15 Learned view aggregation: a ceiling, and precision from spatial context
+
+The multi-view DINOv3 cell averages its 31 registered views. Replacing the mean
+by a learned aggregator that reads the same registered stack and feeds the same
+0.36 M head — attention pooling (27 k), a bidirectional GRU over the views in
+flight order (75 k), or a windowed transformer over 4×4 cells × all views
+(90 k), each zero-initialised to start as the mean — was run through the full
+5 × 3 protocol against a mean control trained through the same online-warp
+pipeline (which reproduces the published cell to within 0.99–1.03×).
+
+| hidden recall, arm ÷ control | attn | gru | swin |
+|---|---|---|---|
+| thermal | **1.108** (5/5, p = .035) | 1.043 (2/5) | **1.064** (5/5, p = .044) |
+| rgb | 1.033 (3/5) | 0.981 (2/5) | 1.041 (3/5) |
+
+All three land in 1.04–1.11× on thermal and at ~1.0× on RGB; the GRU is below
+attention pooling on every thermal fold (p = .038) and the windowed block does
+not beat it either. Re-combining the views therefore recovers at most about a
+tenth more hidden animals, whatever the architecture; the rest is upstream.
+What the windowed block buys is precision: hidden AP50 1.16× in both
+modalities (5/5, p = .026), visible AP50 1.04× (p < .05), and it is the only
+arm without the small RGB visible-recall cost of the other two. On hidden
+recall the measured factors order as aperture 1.50×, aggregation 1.06–1.11×,
+head capacity 1.01×.
+
+Full record: `VIEW_AGGREGATION.md`. Metrics:
+`metrics/viewagg_{mean,attn,gru,swin}_{thermal,rgb}_f{0..4}.json`; tables from
+`scripts/viewagg_arms.py attn gru swin`.
 
 ---
 

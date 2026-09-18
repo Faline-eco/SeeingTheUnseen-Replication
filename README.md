@@ -58,6 +58,14 @@ central view imaged their ground.
   head improves 16 of 16 metrics, but the gains land on visible animals and on
   precision; multi-view hidden recall moves 1.2 %, non-significant —
   [`docs/HEAD_CAPACITY.md`](docs/HEAD_CAPACITY.md).
+- **Learned view aggregation has a ceiling.** Replacing the mean over the 31
+  views by attention pooling, a bidirectional GRU or a windowed transformer
+  (27–90 k parameters, all starting as the mean) recovers **1.04–1.11×**
+  thermal hidden recall and nothing significant on RGB; three architectures
+  agree, so the missing hidden animals are upstream of aggregation. What
+  spatial context buys instead is precision: the windowed transformer raises
+  hidden AP50 1.16× in both modalities with no cost anywhere —
+  [`docs/VIEW_AGGREGATION.md`](docs/VIEW_AGGREGATION.md).
 
 Numbers, protocol and caveats: [`docs/RESULTS.md`](docs/RESULTS.md),
 [`docs/METHODS.md`](docs/METHODS.md), [`docs/YOLO_METRICS.md`](docs/YOLO_METRICS.md).
@@ -80,14 +88,15 @@ Every checkpoint the study produced is on Hugging Face:
 
 **<https://huggingface.co/cpraschl/SeeingTheUnseen>**
 
-390 cross-validated runs — the embedding heads and the 60-run YOLO26x grid, each
-with the `results.csv` and `args.yaml` it was trained with — plus the PCA and
-INSID3 bases every arm depends on. Directory names are the run identifiers used
-throughout this repository, so they join directly against `metrics/*.json` under
-the `arms` key:
+510 cross-validated runs — the embedding heads, the 120 learned-aggregator runs
+and the 60-run YOLO26x grid, each with the per-epoch log and configuration it
+was trained with — plus the PCA and INSID3 bases every arm depends on. Directory
+names are the run identifiers used throughout this repository, so they join
+directly against `metrics/*.json` under the `arms` key:
 
 ```
 heads/cell_thermal_embed_multi_embed_multi_f0_s1337/    <- fold 0, seed 1337
+heads/viewgrid_thermal_embed_multi_swin_f0_s1337/       <- learned aggregator (mean|attn|gru|swin)
 yolo/ortho_thermal_f0_s1337/
 ```
 

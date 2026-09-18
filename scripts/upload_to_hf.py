@@ -28,12 +28,17 @@ WANTED = {
     "weights/best.pt": "best.pt",     # ultralytics nests the weights
     "results.csv": "results.csv",     # per-epoch metrics
     "args.yaml": "args.yaml",         # the exact training configuration
+    # embedding heads and learned-aggregator runs (train_embedding_detector.py,
+    # view_aggregator.py) keep theirs flat
+    "best.pt": "best.pt",
+    "summary.json": "summary.json",   # final metrics + config of the run
+    "results.json": "results.json",   # per-epoch metrics
 }
 
 
-def collect(runs: Path, prefix: str) -> list[tuple[Path, str]]:
+def collect(runs: Path, prefix: str, pattern: str = "*") -> list[tuple[Path, str]]:
     out = []
-    for run in sorted(p for p in runs.iterdir() if p.is_dir()):
+    for run in sorted(p for p in runs.glob(pattern) if p.is_dir()):
         for rel, name in WANTED.items():
             src = run / rel
             if src.is_file():
@@ -49,6 +54,8 @@ def main() -> int:
     ap.add_argument("--repo", default="cpraschl/SeeingTheUnseen")
     ap.add_argument("--prefix", default="yolo",
                     help="Path inside the repo to place <run>/<file> under.")
+    ap.add_argument("--glob", default="*",
+                    help="Only run directories matching this glob, e.g. 'viewgrid_*'.")
     ap.add_argument("--batch", type=int, default=12)
     ap.add_argument("--message", default="Add YOLO26x cross-validation checkpoints")
     ap.add_argument("--dry-run", action="store_true")
@@ -59,7 +66,7 @@ def main() -> int:
         print("HF_TOKEN is not set", file=sys.stderr)
         return 2
 
-    files = collect(args.runs, args.prefix)
+    files = collect(args.runs, args.prefix, args.glob)
     if not files:
         print(f"nothing to upload under {args.runs}", file=sys.stderr)
         return 1

@@ -188,11 +188,17 @@ def main() -> int:
                          "one code path, so cells differ only in the variable "
                          "under study rather than in renderer, head or "
                          "coordinate frame.")
-    ap.add_argument("--emit", default="mean", choices=("mean", "stack"),
+    ap.add_argument("--emit", default="mean", choices=("mean", "stack", "grid"),
                     help="'mean' writes the integrated field (the existing "
                          "behaviour). 'stack' writes the per-view registered "
                          "maps, (S, H, W, C), for V-JEPA arm B — registered but "
-                         "not integrated, so the model integrates.")
+                         "not integrated, so the model integrates. 'grid' "
+                         "writes only the sampling geometry — the grid_sample "
+                         "coordinates of every target cell in every source "
+                         "view, plus validity — so a trainer can warp the "
+                         "source embeddings on the fly and learn the "
+                         "aggregation (view_aggregator.py). ~2 MB per frame "
+                         "against ~130 MB for a feature stack.")
     ap.add_argument("--selftest-stack", action="store_true",
                     help="Assert that reducing the per-view stack reproduces "
                          "the integrated field to floating-point precision "
@@ -230,6 +236,12 @@ def main() -> int:
                  args.alpha_threshold)
     device = torch.device(args.device)
     use_feat = args.channels == "feat" and not args.selftest
+    # Grid mode needs no feature values, only their existence: the frame set
+    # must stay identical to the integrated field's, which skips any central
+    # whose aperture has a source embedding missing.
+    emit_grid = args.emit == "grid"
+    if emit_grid:
+        use_feat = False
     flights = [f.strip() for f in args.flight_ids.split(",") if f.strip()]
 
     for fid in flights:
@@ -284,7 +296,7 @@ def main() -> int:
         # a different shape and rank -- silently, since nothing downstream
         # checks. Deriving the suffix here makes that impossible rather than
         # relying on the caller passing a different --out.
-        root = args.out if args.emit == "mean" else Path(f"{args.out}_stack")
+        root = args.out if args.emit == "mean" else Path(f"{args.out}_{args.emit}")
         out_dir = root / fid / args.modality
         out_dir.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
@@ -297,8 +309,12 @@ def main() -> int:
             # leaves the output identical. Both files must be present — a field
             # without its coverage map is a half-written frame.
             if not args.selftest and not args.overwrite:
-                fp, cp = out_dir / f"{c:06d}.npy", out_dir / f"{c:06d}_cov.npy"
-                if fp.exists() and cp.exists():
+                if emit_grid:
+                    present = (out_dir / f"{c:06d}.npz").exists()
+                else:
+                    fp, cp = out_dir / f"{c:06d}.npy", out_dir / f"{c:06d}_cov.npy"
+                    present = fp.exists() and cp.exists()
+                if present:
                     skipped += 1
                     continue
             aperture = []
@@ -335,20 +351,21 @@ def main() -> int:
                 # per central frame only to grid_sample and discard them was the
                 # dominant cost (3.17 s/frame, GPU at 0-2%), so feed a 1x1
                 # placeholder instead and keep the real load for --channels rgb.
-                if use_feat:
+                if use_feat or emit_grid:
                     imgs.append(torch.zeros(3, 1, 1))
                 else:
                     bgr = _load_bgr(a.image)
                     imgs.append(torch.from_numpy(
                         cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)).float().permute(2, 0, 1) / 255.0)
-                if use_feat:
+                if use_feat or emit_grid:
                     fp = args.embeddings / f"{fid}_{a.frame_idx:06d}.npy"
                     if not fp.exists():
                         feats = None
                         break
-                    feats.append(torch.from_numpy(
-                        np.load(fp).astype(np.float32)).permute(2, 0, 1))
-            if use_feat and not feats:
+                    if use_feat:
+                        feats.append(torch.from_numpy(
+                            np.load(fp).astype(np.float32)).permute(2, 0, 1))
+            if (use_feat or emit_grid) and feats is None:
                 log.warning("flight %s frame %d: missing source embeddings", fid, c)
                 continue
 
@@ -390,6 +407,37 @@ def main() -> int:
                 np.asarray(camera.transform.position, np.float32)).to(device)
 
             n_ch = fstack.shape[1] if use_feat else 3
+
+            if emit_grid:
+                # Exactly the geometry `integrate` samples with, stored instead
+                # of applied: project_to_grid's normalised coordinates and its
+                # validity, further restricted by the modality mask the way the
+                # samplers above do it. Cells the target ray missed, and
+                # (view, cell) pairs that are invalid, get an off-grid
+                # coordinate (-2): grid_sample with zero padding then returns 0
+                # there, which is what `integrate` multiplies in via `valid`.
+                # So a consumer reproduces the integral with one grid_sample,
+                # a sum over views and a division by the count.
+                from alfspy.neural.geometry import project_to_grid
+                g, v = project_to_grid(world, clip)            # (S,P',2),(S,P')
+                if mask_sampler is not None:
+                    mv = mask_sampler.sample(world, tgt_c)
+                    v = v & (mv.feat[..., 0] > 0.5)
+                n_src, npts = g.shape[0], hw * hw
+                idx = torch.from_numpy(np.flatnonzero(hit)).to(device)
+                gfull = torch.full((n_src, npts, 2), -2.0, device=device)
+                vfull = torch.zeros((n_src, npts), dtype=torch.bool, device=device)
+                gfull[:, idx] = torch.where(v.unsqueeze(-1), g, torch.full_like(g, -2.0))
+                vfull[:, idx] = v
+                np.savez(out_dir / f"{c:06d}.npz",
+                         grid=gfull.half().cpu().numpy(),
+                         valid=np.packbits(vfull.cpu().numpy(), axis=1),
+                         src=np.asarray([a.frame_idx for a in aperture], np.int32),
+                         hw=np.int32(hw))
+                done += 1
+                for sh in shots:
+                    sh.release()
+                continue
 
             if args.emit == "stack" or args.selftest_stack:
                 views, vcov = stack_views(sampler, world, tgt_c, hit, hw, n_ch,

@@ -276,11 +276,22 @@ def main() -> int:
             ck = torch.load(run / "best.pt", map_location=device)
             summ = json.loads((run / "summary.json").read_text())
             seeds.append(run.name.rsplit("_s", 1)[-1])
-            va = EmbeddingDet(emb, lab_val, 0, None, summ.get("use_dims", 0))
-            model = EmbeddingDetector(ck["in_dim"], ck["width"], ck["up"]).to(device)
-            model.load_state_dict(ck["model"]); model.eval()
+            if ck.get("kind") == "view_aggregator":
+                # Learned view aggregation: the "dataset" is a grid store and
+                # the model warps the sources itself. Same head, same decode.
+                from view_aggregator import (ViewStackDet, ViewAggregatorDetector,
+                                             collate as vcollate)
+                va = ViewStackDet(emb, lab_val, 0, None, summ.get("use_dims", 0))
+                model = ViewAggregatorDetector.from_checkpoint(ck).to(device)
+                coll = vcollate
+            else:
+                va = EmbeddingDet(emb, lab_val, 0, None, summ.get("use_dims", 0))
+                model = EmbeddingDetector(ck["in_dim"], ck["width"], ck["up"]).to(device)
+                model.load_state_dict(ck["model"])
+                coll = collate
+            model.eval()
             dl = torch.utils.data.DataLoader(va, batch_size=8, shuffle=False,
-                                             num_workers=2, collate_fn=collate)
+                                             num_workers=2, collate_fn=coll)
             recs: list[dict] = []
             with torch.no_grad():
                 for x, _bl, idxs in dl:
